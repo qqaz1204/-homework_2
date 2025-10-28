@@ -16,7 +16,102 @@
    cout << a(x);
    ```
 4. 加法與乘法需合併同次項並保持降冪排序。
+## 2. Algorithm Design & Programming
+   ```cpp
+   #include <iostream>
+using namespace std;
 
+struct Term {
+    float coef; // 係數
+    int exp;    // 次方
+};
+
+class Polynomial {
+public:
+    Term termArray[100]; // 存放多項式項目
+    int terms;           // 非零項數
+
+    Polynomial() {
+        terms = 0;
+    }
+
+    // 新增一項
+    void newTerm(float coef, int exp) {
+        termArray[terms].coef = coef;
+        termArray[terms].exp = exp;
+        terms++;
+    }
+
+    // 多項式加法（照你照片裡的架構）
+    Polynomial Add(Polynomial b) {
+        Polynomial c;
+        int aPos = 0, bPos = 0;
+
+        while ((aPos < terms) && (bPos < b.terms)) {
+            if (termArray[aPos].exp == b.termArray[bPos].exp) {
+                float t = termArray[aPos].coef + b.termArray[bPos].coef;
+                if (t != 0)
+                    c.newTerm(t, termArray[aPos].exp);
+                aPos++;
+                bPos++;
+            }
+            else if (termArray[aPos].exp < b.termArray[bPos].exp) {
+                c.newTerm(b.termArray[bPos].coef, b.termArray[bPos].exp);
+                bPos++;
+            }
+            else { // termArray[aPos].exp > b.termArray[bPos].exp
+                c.newTerm(termArray[aPos].coef, termArray[aPos].exp);
+                aPos++;
+            }
+        }
+
+        for (; aPos < terms; aPos++)
+            c.newTerm(termArray[aPos].coef, termArray[aPos].exp);
+
+        for (; bPos < b.terms; bPos++)
+            c.newTerm(b.termArray[bPos].coef, b.termArray[bPos].exp);
+
+        return c;
+    }
+
+    // 印出多項式
+    void print() {
+        for (int i = 0; i < terms; i++) {
+            cout << termArray[i].coef << "X^" << termArray[i].exp;
+            if (i != terms - 1)
+                cout << " + ";
+        }
+        cout << endl;
+    }
+};
+
+int main() {
+    Polynomial a, b, c;
+    int n, m;
+    float coef;
+    int exp;
+
+    // 輸入 A
+    cin >> n;
+    for (int i = 0; i < n; i++) {
+        cin >> coef >> exp;
+        a.newTerm(coef, exp);
+    }
+
+    // 輸入 B
+    cin >> m;
+    for (int i = 0; i < m; i++) {
+        cin >> coef >> exp;
+        b.newTerm(coef, exp);
+    }
+
+    // 計算 A + B 並輸出
+    c = a.Add(b);
+    c.print();
+
+    return 0;
+}
+   ```
 ## 3. 效能分析 
 
 加法運算 (operator+)
@@ -47,7 +142,7 @@
 加法：時間複雜度 O(n+m)，空間 O(n+m)
 乘法：時間複雜度 O(n×m)，空間 O(n×m)
 代入：時間 O(n)，空間 O(1)
-## 4.測試與驗證
+## 4. 測試與驗證
 ```cpp
 輸入：
 a(x): 3項 → (2 3), (2 2), (4 1)
@@ -77,7 +172,19 @@ n = 10000 → 加法 ~0.1s，乘法 ~50s
 ```
 結果符合理論：加法 O(n)，乘法 O(n²)。
 ## 6. 心得討論 
-1.物件導向設計能將數學結構轉換為程式邏輯。
-2.運算子多載提升程式可讀性。
-3.記憶體管理與同次項合併是關鍵。
-4.效能分析顯示乘法在項數大時成本高，符合預期。
+1.物件導向設計的實用性
+將多項式抽象成類別，並透過封裝（Encapsulation）管理資料與操作，讓程式結構更清晰。這種設計方式不僅提高可讀性，也讓後續擴充功能變得容易。
+
+2.運算子多載的直觀性
+使用 operator+、operator* 和 operator()，讓多項式運算可以像數學公式一樣自然，例如 a + b 或 a(x)。
+
+3.記憶體管理與動態擴充的挑戰
+在實作中，必須處理動態陣列的擴充，確保在容量不足時不會遺失資料。
+4.效能與複雜度分析的重要性
+透過分析加法、乘法和代入的時間與空間複雜度，我能預測在大規模資料下的效能瓶頸。
+
+5.測試與驗證的必要性
+撰寫測試案例並驗證結果，讓我確信程式邏輯正確。若沒有測試，很容易出現錯誤或重複項。
+
+6.效能量測與理論驗證
+觀察加法呈線性成長、乘法呈平方成長，與理論分析一致是實際影響程式效能的關鍵。
